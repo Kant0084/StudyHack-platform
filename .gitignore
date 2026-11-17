@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# 运行产物（assets 中的示例数据 *.xlsx 需保留）
+assets/*.docx
+assets/*.png
+assets/*.csv
+assets/_*
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# IDE / 编辑器
+.vscode/
+.idea/
+*.swp
+
+# 系统
+.DS_Store
+Thumbs.db

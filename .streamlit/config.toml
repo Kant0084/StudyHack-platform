@@ -1,0 +1,13 @@
+[theme]
+# 学术风：低饱和度蓝绿主色，白底
+primaryColor = "#2E7D6B"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F7F6"
+textColor = "#1F2937"
+font = "sans serif"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false
