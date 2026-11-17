@@ -7,11 +7,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
 import streamlit as st
+from core import auth_ui
 
 from core.ui import upload_excel, download_bytes
 from core import preprocessing_service, io_utils
 
 st.set_page_config(page_title="数据预处理", page_icon="🧹", layout="wide")
+
+auth_ui.require_login()
 
 st.title("🧹 数据预处理工具")
 st.caption("Excel 去重、缺失值、长宽表转换、标准化 / 归一化，处理后可导出或跳转分析")

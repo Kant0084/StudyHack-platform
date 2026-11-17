@@ -6,12 +6,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
+from core import auth_ui
 
 from core import literature_service as lit
 from core import llm_client
 from core import ui
 
 st.set_page_config(page_title="文献学习辅助", page_icon="📖", layout="wide")
+
+auth_ui.require_login()
 
 st.title("📖 文献学习辅助")
 st.caption("文献摘要拆解 · 科研笔记模板 · 期刊分区查询")

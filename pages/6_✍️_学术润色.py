@@ -6,12 +6,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
+from core import auth_ui
 
 from core import writing_service as ws
 from core import llm_client
 from core import ui
 
 st.set_page_config(page_title="学术写作辅助", page_icon="✍️", layout="wide")
+
+auth_ui.require_login()
 
 st.title("✍️ 学术写作辅助")
 st.caption("学术化润色 · 论文各章节模板 · 表格/公式转 LaTeX")

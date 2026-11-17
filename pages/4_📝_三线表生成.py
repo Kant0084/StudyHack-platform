@@ -7,11 +7,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
 import streamlit as st
+from core import auth_ui
 
 from core.ui import upload_excel, download_bytes, download_docx
 from core import three_line_table, report_service
 
 st.set_page_config(page_title="学术三线表生成", page_icon="📝", layout="wide")
+
+auth_ui.require_login()
 
 st.title("📝 学术三线表生成器")
 st.caption("粘贴 Excel 数据或上传表格文件，一键生成符合 GB/T 7714 规范的标准学术三线表")

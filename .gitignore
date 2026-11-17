@@ -26,3 +26,8 @@ Thumbs.db
 
 # 参赛材料（保留本地，不推送到公开仓库）
 参赛材料.md
+
+# 管理后台与账户数据（仅本地运行，绝不部署到 GitHub/Streamlit）
+admin_app.py
+accounts.db
+admin_secret.txt

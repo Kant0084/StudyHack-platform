@@ -6,8 +6,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
+from core import auth_ui
 
 st.set_page_config(page_title="科研资源导航", page_icon="🗂️", layout="wide")
+
+auth_ui.require_login()
 
 st.title("🗂️ 科研资源导航")
 st.caption("分领域整理免费/常用学术数据库、公开数据源、科研工具与入门教程")

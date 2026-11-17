@@ -6,10 +6,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
+from core import auth_ui
 
 from core import reference_service as ref
 
 st.set_page_config(page_title="参考文献转换", page_icon="📚", layout="wide")
+
+auth_ui.require_login()
 
 st.title("📚 参考文献格式转换器")
 st.caption("填写文献题录，一键切换 GB/T 7714-2015（国标）/ APA 7th / MLA 9th，支持中英文文献")

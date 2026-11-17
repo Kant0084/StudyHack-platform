@@ -6,11 +6,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
+from core import auth_ui
 
 from core.ui import upload_excel, download_docx, pie_chart, bar_chart
 from core import survey_service, report_service
 
 st.set_page_config(page_title="问卷智能分析", page_icon="📊", layout="wide")
+
+auth_ui.require_login()
 
 st.title("📊 问卷智能分析")
 st.caption("支持问卷星 / 腾讯问卷原生导出 Excel，自动识别量表题项，对标 SPSS 26（误差 ≤0.001）")

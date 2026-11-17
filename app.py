@@ -5,6 +5,8 @@
 
 import streamlit as st
 
+from core import auth_ui
+
 st.set_page_config(
     page_title="StudyHack · 科研效率平台",
     page_icon="🎓",
@@ -19,6 +21,9 @@ with st.sidebar:
     st.divider()
     st.markdown("##### 🔒 隐私承诺")
     st.caption("数据仅临时处理，10 分钟内自动清除，不上传、不存储。")
+
+# 账户登录 / 注册（侧边栏）
+auth_ui.render_auth_sidebar()
 
 # ---- 首屏 ----
 st.markdown(

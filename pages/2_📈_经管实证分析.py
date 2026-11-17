@@ -7,11 +7,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
 import streamlit as st
+from core import auth_ui
 
 from core.ui import upload_excel, download_docx
 from core import regression_service, report_service
 
 st.set_page_config(page_title="经管实证分析", page_icon="📈", layout="wide")
+
+auth_ui.require_login()
 
 st.title("📈 经管实证分析")
 st.caption("面板 / 截面数据，预处理 → 描述 → 相关 → OLS 基准回归，对标 Stata 17 reg（误差 ≤0.001）")
