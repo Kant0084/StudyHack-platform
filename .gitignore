@@ -31,3 +31,9 @@ Thumbs.db
 admin_app.py
 accounts.db
 admin_secret.txt
+
+# 本地 secrets（含数据库密码，绝不提交）
+.streamlit/secrets.toml
+
+# 本地启动脚本（本地专用）
+start_local.bat
