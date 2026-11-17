@@ -12,6 +12,7 @@ from core import reference_service as ref
 
 st.set_page_config(page_title="参考文献转换", page_icon="📚", layout="wide")
 
+auth_ui.render_auth_sidebar()
 auth_ui.require_login()
 
 st.title("📚 参考文献格式转换器")

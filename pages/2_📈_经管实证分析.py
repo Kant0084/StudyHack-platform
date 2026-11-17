@@ -14,6 +14,7 @@ from core import regression_service, report_service
 
 st.set_page_config(page_title="经管实证分析", page_icon="📈", layout="wide")
 
+auth_ui.render_auth_sidebar()
 auth_ui.require_login()
 
 st.title("📈 经管实证分析")

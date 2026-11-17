@@ -14,6 +14,7 @@ from core import ui
 
 st.set_page_config(page_title="学术写作辅助", page_icon="✍️", layout="wide")
 
+auth_ui.render_auth_sidebar()
 auth_ui.require_login()
 
 st.title("✍️ 学术写作辅助")

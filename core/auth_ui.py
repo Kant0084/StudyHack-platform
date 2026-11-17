@@ -68,5 +68,5 @@ def require_login() -> None:
     if not account_service.account_exists():
         return  # 访客模式（部署版未配数据库）
     if not st.session_state.get("user"):
-        st.warning("🔒 请先在首页侧边栏「登录 / 注册」后使用本站。")
+        st.warning("🔒 请先在左侧边栏「登录 / 注册」后使用本站。")
         st.stop()

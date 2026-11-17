@@ -14,6 +14,7 @@ from core import three_line_table, report_service
 
 st.set_page_config(page_title="学术三线表生成", page_icon="📝", layout="wide")
 
+auth_ui.render_auth_sidebar()
 auth_ui.require_login()
 
 st.title("📝 学术三线表生成器")

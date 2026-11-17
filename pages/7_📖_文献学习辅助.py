@@ -14,6 +14,7 @@ from core import ui
 
 st.set_page_config(page_title="文献学习辅助", page_icon="📖", layout="wide")
 
+auth_ui.render_auth_sidebar()
 auth_ui.require_login()
 
 st.title("📖 文献学习辅助")
