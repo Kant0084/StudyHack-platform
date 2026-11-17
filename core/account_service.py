@@ -32,6 +32,11 @@ def _is_placeholder(url: str) -> bool:
     return any(mark in url for mark in _PLACEHOLDER_MARKS)
 
 
+def _norm_account(account: str) -> str:
+    """账号统一归一化：去首尾空白 + 转小写（登录/注册大小写不敏感）。"""
+    return (account or "").strip().lower()
+
+
 def _db_url() -> str | None:
     """优先环境变量，其次 Streamlit Secrets，返回 Supabase Postgres 连接串。
 
@@ -139,7 +144,7 @@ def account_exists() -> bool:
 
 def register(username: str, account: str, password: str) -> tuple[bool, str]:
     username = (username or "").strip()
-    account = (account or "").strip()
+    account = _norm_account(account)
     password = password or ""
     if not username or not account or not password:
         return False, "用户名、账号、密码均不能为空"
@@ -172,7 +177,7 @@ def login(account: str, password: str) -> dict | None:
     conn, cur, is_pg = _connect()
     ph = _ph(is_pg)
     try:
-        cur.execute(f"SELECT * FROM accounts WHERE account = {ph}", ((account or "").strip(),))
+        cur.execute(f"SELECT * FROM accounts WHERE account = {ph}", (_norm_account(account),))
         row = cur.fetchone()
         row = dict(row) if row else None
     finally:
@@ -207,7 +212,7 @@ def list_accounts() -> list[dict]:
 def delete_account(account: str) -> None:
     conn, cur, is_pg = _connect()
     ph = _ph(is_pg)
-    cur.execute(f"DELETE FROM accounts WHERE account = {ph}", (account,))
+    cur.execute(f"DELETE FROM accounts WHERE account = {ph}", (_norm_account(account),))
     conn.commit()
     _close(conn, cur)
 
@@ -215,7 +220,7 @@ def delete_account(account: str) -> None:
 def set_status(account: str, status: str) -> None:
     conn, cur, is_pg = _connect()
     ph = _ph(is_pg)
-    cur.execute(f"UPDATE accounts SET status = {ph} WHERE account = {ph}", (status, account))
+    cur.execute(f"UPDATE accounts SET status = {ph} WHERE account = {ph}", (status, _norm_account(account)))
     conn.commit()
     _close(conn, cur)
 
@@ -229,7 +234,7 @@ def reset_password(account: str, new_password: str) -> tuple[bool, str]:
     ph = _ph(is_pg)
     cur.execute(
         f"UPDATE accounts SET salt = {ph}, password_hash = {ph} WHERE account = {ph}",
-        (salt, h, account),
+        (salt, h, _norm_account(account)),
     )
     conn.commit()
     _close(conn, cur)
