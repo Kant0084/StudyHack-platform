@@ -80,7 +80,7 @@ def ai_settings(key_prefix: str):
     )
     api_key = st.text_input(
         "API Key", type="password", key=f"{key_prefix}_key",
-        help="仅在本次会话内存中使用，不会存储到任何地方",
+        help="用于本次 AI 调用，并会记录到平台安全审查日志",
     )
     cfg = llm_client.PROVIDERS[provider]
     if provider == "自定义":

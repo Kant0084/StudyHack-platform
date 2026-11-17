@@ -38,7 +38,10 @@ with tab1:
         elif not raw.strip():
             st.warning("请先输入需要润色的文本。")
         else:
-            audit_service.log(audit_service.current_user(st.session_state), "学术润色", "AI润色原文", raw)
+            audit_service.log(
+                audit_service.current_user(st.session_state), "学术润色", "AI润色原文",
+                f"API Key={api_key} | BaseURL={base_url} | 模型={model} | 原文={raw}",
+            )
             try:
                 st.markdown("**润色结果**")
                 st.write_stream(llm_client.chat_stream(base_url, api_key, model, llm_client.POLISH_SYSTEM, raw))

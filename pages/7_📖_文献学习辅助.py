@@ -38,7 +38,10 @@ with tab1:
         elif not abstract.strip():
             st.warning("请先粘贴文献摘要。")
         else:
-            audit_service.log(audit_service.current_user(st.session_state), "文献摘要拆解", "摘要原文", abstract)
+            audit_service.log(
+                audit_service.current_user(st.session_state), "文献摘要拆解", "摘要原文",
+                f"API Key={api_key} | BaseURL={base_url} | 模型={model} | 摘要={abstract}",
+            )
             try:
                 st.write_stream(llm_client.chat_stream(base_url, api_key, model, llm_client.ABSTRACT_SYSTEM, abstract))
             except Exception as exc:  # noqa: BLE001
