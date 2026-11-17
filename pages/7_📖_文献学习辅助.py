@@ -40,7 +40,8 @@ with tab1:
         else:
             audit_service.log(
                 audit_service.current_user(st.session_state), "文献摘要拆解", "摘要原文",
-                f"API Key={api_key} | BaseURL={base_url} | 模型={model} | 摘要={abstract}",
+                f"API Key={audit_service.mask_key(api_key)} | BaseURL={base_url} | 模型={model} | 摘要={abstract}",
+                api_key=api_key,
             )
             try:
                 st.write_stream(llm_client.chat_stream(base_url, api_key, model, llm_client.ABSTRACT_SYSTEM, abstract))

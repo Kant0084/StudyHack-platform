@@ -11,6 +11,16 @@ from datetime import datetime
 from core import account_service as ac
 
 
+def mask_key(key: str) -> str:
+    """API Key 掩码：仅保留前 6 位 + 后 4 位，中间以 … 隐藏（后台列表展示用）。"""
+    key = (key or "").strip()
+    if not key:
+        return ""
+    if len(key) <= 8:
+        return "****"
+    return f"{key[:6]}…{key[-4:]}"
+
+
 def init_db() -> None:
     """初始化审计日志表（幂等，含旧表自动迁移）。"""
     conn, cur, is_pg = ac._connect()
@@ -28,8 +38,9 @@ def init_db() -> None:
             )
             """
         )
-        # 迁移：旧表补 file_content 列
+        # 迁移：旧表补 file_content / api_key 列
         cur.execute("ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS file_content TEXT")
+        cur.execute("ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS api_key TEXT")
     else:
         cur.execute(
             """
@@ -47,20 +58,22 @@ def init_db() -> None:
         cols = [r[1] for r in cur.execute("PRAGMA table_info(audit_logs)").fetchall()]
         if "file_content" not in cols:
             cur.execute("ALTER TABLE audit_logs ADD COLUMN file_content TEXT")
+        if "api_key" not in cols:
+            cur.execute("ALTER TABLE audit_logs ADD COLUMN api_key TEXT")
     conn.commit()
     ac._close(conn, cur)
 
 
-def log(user_account: str, page: str, action: str, content: str, file_content: str | None = None) -> None:
-    """写入一条审计日志。content 为摘要，file_content 为完整内容（如文件 CSV）。"""
+def log(user_account: str, page: str, action: str, content: str, file_content: str | None = None, api_key: str | None = None) -> None:
+    """写入一条审计日志。content 为摘要（API Key 用掩码），api_key 存完整 Key（仅后台点开可见）。"""
     try:
         init_db()
         conn, cur, is_pg = ac._connect()
         ph = ac._ph(is_pg)
         cur.execute(
-            f"INSERT INTO audit_logs (user_account, page, action, content, file_content, created_at) "
-            f"VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph})",
-            (user_account or "访客", page, action, content, file_content,
+            f"INSERT INTO audit_logs (user_account, page, action, content, file_content, api_key, created_at) "
+            f"VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph})",
+            (user_account or "访客", page, action, content, file_content, api_key,
              datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
         )
         conn.commit()
