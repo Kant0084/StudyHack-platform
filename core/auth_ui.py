@@ -27,12 +27,39 @@ def _submit_register() -> None:
     st.session_state["register_msg"] = ("success" if ok else "error", msg)
 
 
+def _submit_login() -> None:
+    """登录回调（在控件实例化前运行，安全修改 session_state）。"""
+    u = account_service.login(
+        st.session_state.get("login_account", ""),
+        st.session_state.get("login_password", ""),
+    )
+    if u:
+        st.session_state["user"] = u
+        st.session_state.pop("login_msg", None)
+    else:
+        st.session_state["login_msg"] = "账号或密码错误（或被禁用）"
+
+
+def _logout() -> None:
+    """退出登录回调（在控件实例化前运行，安全修改 session_state）。"""
+    st.session_state.pop("user", None)
+    st.session_state.pop("login_msg", None)
+    st.session_state.pop("auth_mode", None)
+
+
 def _show_register_msg() -> None:
     """展示注册结果消息（只展示一次）。"""
     msg = st.session_state.pop("register_msg", None)
     if msg:
         kind, text = msg
         (st.success if kind == "success" else st.error)(text)
+
+
+def _show_login_msg() -> None:
+    """展示登录失败消息（只展示一次）。"""
+    msg = st.session_state.pop("login_msg", None)
+    if msg:
+        st.error(msg)
 
 
 def render_auth_sidebar() -> None:
@@ -44,9 +71,7 @@ def render_auth_sidebar() -> None:
         if user:
             st.markdown(f"### 👤 {user['username']}")
             st.caption(f"账号：{user['account']}")
-            if st.button("🚪 退出登录", width="stretch"):
-                st.session_state.pop("user", None)
-                st.rerun()
+            st.button("🚪 退出登录", width="stretch", on_click=_logout)
             return
 
         # 未登录：两个按钮切换「登录 / 注册」（on_click 回调，规避控件键冲突）
@@ -63,19 +88,14 @@ def render_auth_sidebar() -> None:
 
         if mode == "登录":
             _show_register_msg()
-            account = st.text_input("账号", key="login_account")
-            password = st.text_input("密码", type="password", key="login_password")
-            if st.button("确认登录", type="primary", width="stretch"):
-                u = account_service.login(account, password)
-                if u:
-                    st.session_state["user"] = u
-                    st.rerun()
-                else:
-                    st.error("账号或密码错误（或被禁用）")
+            _show_login_msg()
+            st.text_input("账号", key="login_account")
+            st.text_input("密码", type="password", key="login_password")
+            st.button("确认登录", type="primary", width="stretch", on_click=_submit_login)
         else:
-            username = st.text_input("用户名", key="reg_username")
-            account = st.text_input("账号", key="reg_account")
-            password = st.text_input("密码", type="password", key="reg_password", help="至少 6 位")
+            st.text_input("用户名", key="reg_username")
+            st.text_input("账号", key="reg_account")
+            st.text_input("密码", type="password", key="reg_password", help="至少 6 位")
             st.button("确认注册", type="primary", width="stretch", on_click=_submit_register)
             _show_register_msg()
 
