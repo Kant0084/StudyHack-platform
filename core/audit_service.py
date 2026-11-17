@@ -12,13 +12,13 @@ from core import account_service as ac
 
 
 def mask_key(key: str) -> str:
-    """API Key 掩码：仅保留前 6 位 + 后 4 位，中间以 … 隐藏（后台列表展示用）。"""
+    """API Key 掩码：仅保留前 6 位 + 后 4 位，中间以 **** 隐藏（后台列表展示用）。"""
     key = (key or "").strip()
     if not key:
         return ""
     if len(key) <= 8:
         return "****"
-    return f"{key[:6]}…{key[-4:]}"
+    return f"{key[:6]}****{key[-4:]}"
 
 
 def init_db() -> None:
