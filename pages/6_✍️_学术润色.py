@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
 from core import auth_ui
+from core import audit_service
 
 from core import writing_service as ws
 from core import llm_client
@@ -37,6 +38,7 @@ with tab1:
         elif not raw.strip():
             st.warning("请先输入需要润色的文本。")
         else:
+            audit_service.log(audit_service.current_user(st.session_state), "学术润色", "AI润色原文", raw)
             try:
                 st.markdown("**润色结果**")
                 st.write_stream(llm_client.chat_stream(base_url, api_key, model, llm_client.POLISH_SYSTEM, raw))

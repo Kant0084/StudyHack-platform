@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pandas as pd
 import streamlit as st
 from core import auth_ui
+from core import audit_service
 
 from core.ui import upload_excel, download_bytes, download_docx
 from core import three_line_table, report_service
@@ -31,6 +32,9 @@ with tab_in:
         pasted = st.text_area("在此粘贴", height=180, placeholder="变量\t均值\t标准差\n营业收入\t1.234\t0.567\n净利润\t0.890\t0.321")
         if pasted.strip():
             df = three_line_table.parse_pasted(pasted)
+            audit_service.log(
+                audit_service.current_user(st.session_state), "三线表生成", "粘贴数据", pasted
+            )
     else:
         df, _ = upload_excel(key="tlt_upload")
 

@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
 from core import auth_ui
+from core import audit_service
 
 from core.ui import upload_excel, download_docx, pie_chart, bar_chart
 from core import survey_service, report_service
@@ -33,6 +34,10 @@ if df is None and "incoming_df" in st.session_state:
     st.info("📥 已载入「数据预处理」模块处理后的数据")
 
 if df is not None:
+    audit_service.log(
+        audit_service.current_user(st.session_state), "问卷智能分析", "上传文件",
+        f"文件名={fname}; 行数={df.shape[0]}; 列数={df.shape[1]}",
+    )
     # 列识别预览
     preview = survey_service.list_survey_columns(df)
     scale_cols = preview["scale_cols"]

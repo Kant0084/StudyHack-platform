@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pandas as pd
 import streamlit as st
 from core import auth_ui
+from core import audit_service
 
 from core.ui import upload_excel, download_docx
 from core import regression_service, report_service
@@ -33,6 +34,10 @@ if df is None and "incoming_df" in st.session_state:
     st.info("📥 已载入「数据预处理」模块处理后的数据")
 
 if df is not None:
+    audit_service.log(
+        audit_service.current_user(st.session_state), "经管实证分析", "上传文件",
+        f"文件名={fname}; 行数={df.shape[0]}; 列数={df.shape[1]}",
+    )
     num_cols = df.select_dtypes(include=["number"]).columns.tolist()
     all_cols = df.columns.tolist()
 

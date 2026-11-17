@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
 from core import auth_ui
+from core import audit_service
 
 from core import reference_service as ref
 
@@ -45,6 +46,10 @@ if st.button("🔄 生成三种格式", type="primary", width="stretch"):
     if not title.strip():
         st.warning("请至少填写「题名 / 标题」。")
     else:
+        audit_service.log(
+            audit_service.current_user(st.session_state), "参考文献转换", "题录信息",
+            f"标题={title}; 作者={authors}; 年份={year}; 来源={source}; 卷={volume}; 期={issue}; 页码={pages}; DOI={doi}",
+        )
         r = ref.format_reference(
             ref_type=rt, authors=authors, year=year, title=title, source=source,
             volume=volume, issue=issue, pages=pages, doi=doi, location=location, degree=degree,

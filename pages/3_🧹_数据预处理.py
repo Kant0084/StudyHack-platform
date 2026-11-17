@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pandas as pd
 import streamlit as st
 from core import auth_ui
+from core import audit_service
 
 from core.ui import upload_excel, download_bytes
 from core import preprocessing_service, io_utils
@@ -23,6 +24,10 @@ st.caption("Excel 去重、缺失值、长宽表转换、标准化 / 归一化�
 df, fname = upload_excel(key="preprocess_upload")
 
 if df is not None:
+    audit_service.log(
+        audit_service.current_user(st.session_state), "数据预处理", "上传文件",
+        f"文件名={fname}; 行数={df.shape[0]}; 列数={df.shape[1]}",
+    )
     st.markdown("### 选择预处理操作")
     op = st.radio(
         "操作类型",
