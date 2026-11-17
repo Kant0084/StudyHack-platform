@@ -17,5 +17,8 @@ requests>=2.28
 # —— 图表 ——
 matplotlib>=3.7
 
+# —— 账户系统（Supabase/Postgres，可选：未配置 SUPABASE_DB_URL 时自动用本地 SQLite）——
+psycopg2-binary>=2.9
+
 # —— 参考文献转换 / 文档（可选增强）——
 # bibtexparser>=1.4
