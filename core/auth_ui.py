@@ -7,6 +7,34 @@ import streamlit as st
 from core import account_service
 
 
+def _switch_login() -> None:
+    st.session_state["auth_mode"] = "登录"
+
+
+def _switch_register() -> None:
+    st.session_state["auth_mode"] = "注册"
+
+
+def _submit_register() -> None:
+    """注册回调（在控件实例化前运行，安全修改 session_state）。"""
+    ok, msg = account_service.register(
+        st.session_state.get("reg_username", ""),
+        st.session_state.get("reg_account", ""),
+        st.session_state.get("reg_password", ""),
+    )
+    if ok:
+        st.session_state["auth_mode"] = "登录"
+    st.session_state["register_msg"] = ("success" if ok else "error", msg)
+
+
+def _show_register_msg() -> None:
+    """展示注册结果消息（只展示一次）。"""
+    msg = st.session_state.pop("register_msg", None)
+    if msg:
+        kind, text = msg
+        (st.success if kind == "success" else st.error)(text)
+
+
 def render_auth_sidebar() -> None:
     """在侧边栏渲染登录/注册（或已登录状态）。"""
     with st.sidebar:
@@ -21,28 +49,26 @@ def render_auth_sidebar() -> None:
                 st.rerun()
             return
 
-        # 未登录：用两个按钮切换「登录 / 注册」（auth_mode 为普通变量，非控件 key）
+        # 未登录：两个按钮切换「登录 / 注册」（on_click 回调，规避控件键冲突）
         mode = st.session_state.get("auth_mode", "登录")
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("🔐 登录", width="stretch",
-                         type="primary" if mode == "登录" else "secondary"):
-                st.session_state["auth_mode"] = "登录"
-                st.rerun()
+            st.button("🔐 登录", width="stretch",
+                      type="primary" if mode == "登录" else "secondary",
+                      on_click=_switch_login)
         with c2:
-            if st.button("📝 注册", width="stretch",
-                         type="primary" if mode == "注册" else "secondary"):
-                st.session_state["auth_mode"] = "注册"
-                st.rerun()
+            st.button("📝 注册", width="stretch",
+                      type="primary" if mode == "注册" else "secondary",
+                      on_click=_switch_register)
 
         if mode == "登录":
+            _show_register_msg()
             account = st.text_input("账号", key="login_account")
             password = st.text_input("密码", type="password", key="login_password")
             if st.button("确认登录", type="primary", width="stretch"):
                 u = account_service.login(account, password)
                 if u:
                     st.session_state["user"] = u
-                    st.success(f"欢迎回来，{u['username']}！")
                     st.rerun()
                 else:
                     st.error("账号或密码错误（或被禁用）")
@@ -50,14 +76,8 @@ def render_auth_sidebar() -> None:
             username = st.text_input("用户名", key="reg_username")
             account = st.text_input("账号", key="reg_account")
             password = st.text_input("密码", type="password", key="reg_password", help="至少 6 位")
-            if st.button("确认注册", type="primary", width="stretch"):
-                ok, msg = account_service.register(username, account, password)
-                if ok:
-                    st.success(msg)
-                    st.session_state["auth_mode"] = "登录"  # 注册成功自动切回登录
-                    st.rerun()
-                else:
-                    st.error(msg)
+            st.button("确认注册", type="primary", width="stretch", on_click=_submit_register)
+            _show_register_msg()
 
 
 def require_login() -> None:
