@@ -8,7 +8,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import streamlit as st
 
 from core import literature_service as lit
-from core import llm_component
+from core import llm_client
+from core import ui
 
 st.set_page_config(page_title="文献学习辅助", page_icon="📖", layout="wide")
 
@@ -19,17 +20,32 @@ tab1, tab2, tab3 = st.tabs(["🔬 摘要拆解", "📓 笔记模板", "🏆 期�
 
 with tab1:
     st.markdown("### 文献摘要拆解")
-    st.caption("粘贴摘要，AI 自动提取「研究问题 / 核心方法 / 主要结论 / 研究创新」四大要素")
-    st.components.v1.html(llm_component.abstract_component(), height=500)
+    st.caption("粘贴摘要，AI 自动提取「研究问题 / 核心方法 / 主要结论 / 研究创新」四大要素（需自备 API Key）")
+    with st.expander("🔑 AI 设置", expanded=True):
+        base_url, model, api_key = ui.ai_settings("abstract")
+    abstract = st.text_area("粘贴文献摘要", height=160,
+                            placeholder="本文基于……，采用……方法，利用……数据，考察了……。结果表明……。本研究的边际贡献在于……")
+    if st.button("🤖 AI 拆解四大要素", type="primary"):
+        if not api_key.strip():
+            st.warning("请先在上方「AI 设置」中输入你的 API Key。")
+        elif not base_url.strip() or not model.strip():
+            st.warning("请完整填写 Base URL 和模型名。")
+        elif not abstract.strip():
+            st.warning("请先粘贴文献摘要。")
+        else:
+            try:
+                st.write_stream(llm_client.chat_stream(base_url, api_key, model, llm_client.ABSTRACT_SYSTEM, abstract))
+            except Exception as exc:  # noqa: BLE001
+                st.error(f"调用失败：{exc}")
     st.divider()
     with st.expander("🔧 离线规则拆解（无需 AI，效果较基础）"):
-        abstract = st.text_area("粘贴文献摘要", height=150, key="abstract_offline",
-                                placeholder="本文基于……，采用……方法，利用……数据，考察了……。结果表明……。本研究的边际贡献在于……")
+        abstract_offline = st.text_area("粘贴文献摘要", height=150, key="abstract_offline",
+                                        placeholder="本文基于……，采用……方法，利用……数据，考察了……。结果表明……。本研究的边际贡献在于……")
         if st.button("🔬 规则拆解"):
-            if not abstract.strip():
+            if not abstract_offline.strip():
                 st.warning("请先粘贴文献摘要。")
             else:
-                r = lit.extract_abstract(abstract)
+                r = lit.extract_abstract(abstract_offline)
                 for aspect in ["研究问题", "核心方法", "主要结论", "研究创新"]:
                     sents = r.get(aspect, [])
                     st.markdown(f"**{aspect}**")

@@ -64,3 +64,34 @@ def bar_chart(counts, title: str = ""):
         ax.set_title(title, fontsize=12)
     plt.xticks(rotation=30, ha="right")
     return fig
+
+
+def ai_settings(key_prefix: str):
+    """AI 设置 UI：提供商 + API Key + 模型，返回 (base_url, model, api_key)。
+
+    API Key 仅存 session_state 内存，不落盘。key_prefix 用于区分不同页面的组件。
+    """
+    from core import llm_client
+
+    provider = st.selectbox(
+        "大模型提供商", list(llm_client.PROVIDERS.keys()),
+        key=f"{key_prefix}_provider",
+        help="支持任意 OpenAI 兼容接口",
+    )
+    api_key = st.text_input(
+        "API Key", type="password", key=f"{key_prefix}_key",
+        help="仅在本次会话内存中使用，不会存储到任何地方",
+    )
+    cfg = llm_client.PROVIDERS[provider]
+    if provider == "自定义":
+        base_url = st.text_input(
+            "Base URL（OpenAI 兼容）", value="", key=f"{key_prefix}_url",
+            placeholder="例如 https://api.deepseek.com/v1",
+        )
+        model = st.text_input("模型名", value="", key=f"{key_prefix}_model", placeholder="例如 deepseek-chat")
+    else:
+        base_url = cfg["base_url"]
+        model = st.text_input("模型名", value=cfg["model"], key=f"{key_prefix}_model")
+    st.caption(f"当前提供商：{provider}（{cfg['desc']}）· 各厂商 Key 请到其官网申请")
+    return base_url, model, api_key
+

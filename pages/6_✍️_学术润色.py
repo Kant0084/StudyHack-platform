@@ -8,7 +8,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import streamlit as st
 
 from core import writing_service as ws
-from core import llm_component
+from core import llm_client
+from core import ui
 
 st.set_page_config(page_title="学术写作辅助", page_icon="✍️", layout="wide")
 
@@ -19,17 +20,33 @@ tab1, tab2, tab3 = st.tabs(["🖋️ 学术润色", "📑 论文模板", "📐 �
 
 with tab1:
     st.markdown("### 学术化润色")
-    st.caption("输入口语化表述，AI 一键改写为规范学术表达")
-    st.components.v1.html(llm_component.polish_component(), height=500)
+    st.caption("输入口语化表述，AI 一键改写为规范学术表达（需自备 API Key）")
+    with st.expander("🔑 AI 设置", expanded=True):
+        base_url, model, api_key = ui.ai_settings("polish")
+    raw = st.text_area("输入原始表述", height=150,
+                       placeholder="我觉得这个变量很重要，而且结果也证明了我们的想法……")
+    if st.button("✨ AI 学术化改写", type="primary"):
+        if not api_key.strip():
+            st.warning("请先在上方「AI 设置」中输入你的 API Key。")
+        elif not base_url.strip() or not model.strip():
+            st.warning("请完整填写 Base URL 和模型名。")
+        elif not raw.strip():
+            st.warning("请先输入需要润色的文本。")
+        else:
+            try:
+                st.markdown("**润色结果**")
+                st.write_stream(llm_client.chat_stream(base_url, api_key, model, llm_client.POLISH_SYSTEM, raw))
+            except Exception as exc:  # noqa: BLE001
+                st.error(f"调用失败：{exc}")
     st.divider()
     with st.expander("🔧 离线规则润色（无需 AI，效果较基础）"):
-        raw = st.text_area("输入原始表述", height=150, key="raw_offline",
-                           placeholder="我觉得这个变量很重要，而且结果也证明了我们的想法……")
+        raw_offline = st.text_area("输入原始表述", height=150, key="raw_offline",
+                                   placeholder="我觉得这个变量很重要，而且结果也证明了我们的想法……")
         if st.button("✨ 规则润色"):
-            if not raw.strip():
+            if not raw_offline.strip():
                 st.warning("请先输入需要润色的文本。")
             else:
-                polished, changes = ws.polish_text(raw)
+                polished, changes = ws.polish_text(raw_offline)
                 st.markdown("**润色后**")
                 st.write(polished)
                 if changes:
