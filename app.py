@@ -134,6 +134,5 @@ step3.markdown("**③ 下载报告**\n\n三线表 + 学术解读，复制进论�
 
 st.markdown("---")
 st.caption(
-    "StudyHack · Qoder 高校创造力大赛 StudyHack 赛道参赛作品 ｜ "
     "核心计算对标 SPSS 26 / Stata 17 ｜ 数据仅临时处理，10 分钟内自动清除"
 )

@@ -1,8 +1,8 @@
 """StudyHack 平台 core 层 —— ERK 薄封装。
 
-设计原则（严格对齐参赛要求）：
+设计原则：
 1. 只做「参数校验、结果封装、错误友好提示、报告后处理」，绝不复制/改写 ERK 核心计算逻辑；
-2. 通过 sys.path 将 empirical-research-kit/src 加入导入路径，保证参赛作品可移植部署；
+2. 通过 sys.path 将 empirical-research-kit/src 加入导入路径，保证项目可移植部署；
 3. 所有统计计算直接调用 erk.*，确保对标 SPSS 26 / Stata 17 的准确性。
 """
 
