@@ -24,16 +24,27 @@ _ITERATIONS = 100_000
 
 # ---- 连接串获取 ----
 
+# 占位符标记：密码尚未替换时，视为「未配置」，自动降级本地 SQLite
+_PLACEHOLDER_MARKS = ("你的数据库密码", "[YOUR-PASSWORD]", "[YOUR_PASSWORD]", "your_password", "占位")
+
+
+def _is_placeholder(url: str) -> bool:
+    return any(mark in url for mark in _PLACEHOLDER_MARKS)
+
+
 def _db_url() -> str | None:
-    """优先环境变量，其次 Streamlit Secrets，返回 Supabase Postgres 连接串。"""
+    """优先环境变量，其次 Streamlit Secrets，返回 Supabase Postgres 连接串。
+
+    密码仍为占位符时视为未配置，返回 None（降级本地 SQLite）。
+    """
     url = os.environ.get("SUPABASE_DB_URL")
-    if url:
+    if url and not _is_placeholder(url):
         return url.strip()
     try:
         import streamlit as st
 
         url = st.secrets.get("SUPABASE_DB_URL")
-        if url:
+        if url and not _is_placeholder(str(url)):
             return str(url).strip()
     except Exception:  # noqa: BLE001
         pass

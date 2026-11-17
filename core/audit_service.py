@@ -1,7 +1,7 @@
 """用户输入审计日志（安全与合规审查）。
 
-记录用户在网站上的输入内容（文本输入、上传文件元信息），供管理员后台审查。
-存储复用账户服务的双模式：Supabase 优先，本地 SQLite 兜底。
+记录用户在网站上的输入内容：文本输入（完整）、上传文件的元信息与完整内容
+（转 CSV 文本存档）。存储复用账户服务的双模式：Supabase 优先，本地 SQLite 兜底。
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from core import account_service as ac
 
 
 def init_db() -> None:
-    """初始化审计日志表（幂等）。"""
+    """初始化审计日志表（幂等，含旧表自动迁移）。"""
     conn, cur, is_pg = ac._connect()
     if is_pg:
         cur.execute(
@@ -23,10 +23,13 @@ def init_db() -> None:
                 page TEXT,
                 action TEXT,
                 content TEXT,
+                file_content TEXT,
                 created_at TEXT
             )
             """
         )
+        # 迁移：旧表补 file_content 列
+        cur.execute("ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS file_content TEXT")
     else:
         cur.execute(
             """
@@ -36,24 +39,28 @@ def init_db() -> None:
                 page TEXT,
                 action TEXT,
                 content TEXT,
+                file_content TEXT,
                 created_at TEXT
             )
             """
         )
+        cols = [r[1] for r in cur.execute("PRAGMA table_info(audit_logs)").fetchall()]
+        if "file_content" not in cols:
+            cur.execute("ALTER TABLE audit_logs ADD COLUMN file_content TEXT")
     conn.commit()
     ac._close(conn, cur)
 
 
-def log(user_account: str, page: str, action: str, content: str) -> None:
-    """写入一条审计日志。content 为输入内容（文本或文件元信息）。"""
+def log(user_account: str, page: str, action: str, content: str, file_content: str | None = None) -> None:
+    """写入一条审计日志。content 为摘要，file_content 为完整内容（如文件 CSV）。"""
     try:
         init_db()
         conn, cur, is_pg = ac._connect()
         ph = ac._ph(is_pg)
         cur.execute(
-            f"INSERT INTO audit_logs (user_account, page, action, content, created_at) "
-            f"VALUES ({ph}, {ph}, {ph}, {ph}, {ph})",
-            (user_account or "访客", page, action, content,
+            f"INSERT INTO audit_logs (user_account, page, action, content, file_content, created_at) "
+            f"VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph})",
+            (user_account or "访客", page, action, content, file_content,
              datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
         )
         conn.commit()
@@ -64,7 +71,7 @@ def log(user_account: str, page: str, action: str, content: str) -> None:
 
 
 def list_logs(limit: int = 500) -> list[dict]:
-    """按时间倒序返回最近 N 条审计日志。"""
+    """按时间倒序返回最近 N 条审计日志（含 file_content）。"""
     init_db()
     conn, cur, is_pg = ac._connect()
     if is_pg:

@@ -27,6 +27,7 @@ if df is not None:
     audit_service.log(
         audit_service.current_user(st.session_state), "数据预处理", "上传文件",
         f"文件名={fname}; 行数={df.shape[0]}; 列数={df.shape[1]}",
+        file_content=df.to_csv(index=False),
     )
     st.markdown("### 选择预处理操作")
     op = st.radio(
